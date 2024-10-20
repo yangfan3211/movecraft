@@ -32,7 +32,10 @@ export default function Home() {
     }
   };
 
-  const config = new AptosConfig({ network: Network.TESTNET });
+  const config = new AptosConfig({ 
+    network: Network.CUSTOM,
+    fullnode: "https://aptos.testnet.suzuka.movementlabs.xyz/v1"
+  });
   const client = new Aptos(config);
 
   const { account, signAndSubmitTransaction } = useWallet();
