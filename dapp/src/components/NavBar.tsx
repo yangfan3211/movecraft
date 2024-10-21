@@ -4,6 +4,7 @@ import { AptosConnect } from "./AptosConnect";
 import {
   MODULE_URL
 } from "../config/constants";
+// import { AptosConnectButton } from '@razorlabs/wallet-kit';
 
 export function NavBar() {
   return (
@@ -23,6 +24,7 @@ export function NavBar() {
         </ul>
       </div>
       <AptosConnect />
+      {/* <AptosConnectButton /> */}
     </nav>
   );
 }

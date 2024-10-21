@@ -5,6 +5,7 @@ import {
   MODULE_URL,
   BLOCK_COLLECTION_NAME,
   STATE_SEED,
+  APTOS_CONFIG,
 } from "../config/constants";
 import { useWallet } from "@manahippo/aptos-wallet-adapter";
 import { MoveResource } from "@martiandao/aptos-web3-bip44.js/dist/generated";
@@ -32,7 +33,7 @@ export default function Home() {
     }
   };
 
-  const config = new AptosConfig({ network: Network.TESTNET });
+  const config = APTOS_CONFIG;
   const client = new Aptos(config);
 
   const { account, signAndSubmitTransaction } = useWallet();

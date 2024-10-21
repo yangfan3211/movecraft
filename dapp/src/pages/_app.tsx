@@ -13,6 +13,10 @@ import {
 } from "@manahippo/aptos-wallet-adapter";
 import { ModalContext, ModalState } from "../components/ModalContext";
 import { Toaster } from "react-hot-toast";
+// import { AptosWalletProvider } from "@razorlabs/wallet-kit";
+// import "@razorlabs/wallet-kit/style.css";
+import 'dotenv/config'
+
 function WalletSelector({ Component, pageProps }: AppProps) {
   const [modalState, setModalState] = useState<ModalState>({
     walletModal: false,
@@ -38,6 +42,7 @@ function WalletSelector({ Component, pageProps }: AppProps) {
 
   return (
     <WalletProvider wallets={wallets} autoConnect={false}>
+    {/* <AptosWalletProvider > */}
       <ModalContext.Provider value={modals}>
         <div className="px-8">
           <NavBar />
@@ -45,6 +50,7 @@ function WalletSelector({ Component, pageProps }: AppProps) {
           <Toaster />
         </div>
       </ModalContext.Provider>
+    {/* </AptosWalletProvider> */}
     </WalletProvider>
   );
 }
