@@ -25,8 +25,7 @@ import { BlockItem } from "../components/BlockItem";
 import { Capy } from "../types/Capy";
 
 export default function Home() {
-  const config = APTOS_CONFIG;
-  const client = new Aptos(config);
+  const client = new Aptos(APTOS_CONFIG);
 
   const { account, signAndSubmitTransaction } = useWallet();
 

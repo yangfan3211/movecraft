@@ -32,9 +32,7 @@ export default function Home() {
       toast.error("Failed to copy Cell ID.");
     }
   };
-
-  const config = APTOS_CONFIG;
-  const client = new Aptos(config);
+  const client = new Aptos(APTOS_CONFIG);
 
   const { account, signAndSubmitTransaction } = useWallet();
 
