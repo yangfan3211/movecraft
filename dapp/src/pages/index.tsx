@@ -6,20 +6,25 @@ import {
   BLOCK_COLLECTION_NAME,
   STATE_SEED,
   APTOS_CONFIG,
+  NETWORK_INFO,
 } from "../config/constants";
-import { useWallet } from "@manahippo/aptos-wallet-adapter";
-import { MoveResource } from "@martiandao/aptos-web3-bip44.js/dist/generated";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import React from "react";
-import { Account, Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
+import {
+  Account,
+  Aptos,
+  AptosConfig,
+  InputGenerateTransactionPayloadData,
+  Network,
+} from "@aptos-labs/ts-sdk";
 
 import { BlockType } from "../types";
 import toast, { LoaderIcon } from "react-hot-toast";
 import { Block } from "../types/Block";
 import { BlockItem } from "../components/BlockItem";
+import { useAptosWallet } from "@razorlabs/wallet-kit";
 
 export default function Home() {
-
   const copyToClipboard = async () => {
     console.log("selectedBlock", selectedBlock?.token_id);
     try {
@@ -34,7 +39,8 @@ export default function Home() {
   };
   const client = new Aptos(APTOS_CONFIG);
 
-  const { account, signAndSubmitTransaction } = useWallet();
+  // const { account, signAndSubmitTransaction } = useWallet();
+  const { account, signAndSubmitTransaction, adapter } = useAptosWallet();
 
   const [isLoading, setLoading] = useState<boolean>(false);
   // const [blockType, setBlockType] = useState<number>(BlockType.Cell_0);
@@ -44,38 +50,36 @@ export default function Home() {
   const [isStackMode, setStackMode] = useState<boolean>(false);
 
   const loadBlocks = async () => {
-    
     if (account && account.address) {
       // try {
-        setLoading(true);
+      setLoading(true);
 
-        setStackMode(false);
-        setSelectedId(undefined);
+      setStackMode(false);
+      setSelectedId(undefined);
 
-        const collectionAddress = await getCollectionAddr();
+      const collectionAddress = await getCollectionAddr();
 
-        const tokens = await client.getAccountOwnedTokensFromCollectionAddress({
-          accountAddress: account.address.toString(),
-          collectionAddress: collectionAddress,
-        });
+      const tokens = await client.getAccountOwnedTokensFromCollectionAddress({
+        accountAddress: account.address.toString(),
+        collectionAddress: collectionAddress,
+      });
 
-
-        const blocks = tokens.map((t) => {
-          const token_data = t.current_token_data;
-          const properties = token_data?.token_properties;
-          console.log("token_data", token_data);
-          console.log("properties", properties);
-          return {
-            name: token_data?.token_name || "",
-            token_id: token_data?.token_data_id || "",
-            token_uri: token_data?.token_uri || "",
-            id: properties.id,
-            type: properties.type,
-            count: properties.count,
-          };
-        });
-        console.log(tokens);
-        setBlocks(blocks);
+      const blocks = tokens.map((t) => {
+        const token_data = t.current_token_data;
+        const properties = token_data?.token_properties;
+        console.log("token_data", token_data);
+        console.log("properties", properties);
+        return {
+          name: token_data?.token_name || "",
+          token_id: token_data?.token_data_id || "",
+          token_uri: token_data?.token_uri || "",
+          id: properties.id,
+          type: properties.type,
+          count: properties.count,
+        };
+      });
+      console.log(tokens);
+      setBlocks(blocks);
       // } catch {}
 
       setLoading(false);
@@ -92,12 +96,22 @@ export default function Home() {
       type_arguments: [],
       arguments: [],
     };
-    const res = (await client.view({payload: payload}));
+    const res = await client.view({ payload: payload });
     console.log("collectionAddr", res[0]);
     return res[0];
   }
+  useEffect(() => {
+    console.log("Adapter changed:", adapter);
+  }, [adapter]);
+  const handleMintBlock = useCallback(async () => {
+    console.log("Current adapter:", adapter);
+    console.log("Current account:", account);
+    if (adapter) {
+      await adapter.features["aptos:changeNetwork"]?.changeNetwork(
+        NETWORK_INFO
+      );
+    }
 
-  const handleMintBlock = async () => {
     if (!account) {
       toast.error("You need to connect wallet");
       return;
@@ -112,13 +126,13 @@ export default function Home() {
       const payloads = {
         type: "entry_function_payload",
         function: DAPP_ADDRESS + "::block::mint",
-        type_arguments: [],
-        arguments: [],
+        typeArguments: [],
+        functionArguments: [],
         // mint to signer as default.
       };
-
-      const tx = await signAndSubmitTransaction(payloads, {
-        gas_unit_price: 100,
+      const tx = await signAndSubmitTransaction({
+        gasUnitPrice: 100,
+        payload: payloads as unknown as InputGenerateTransactionPayloadData,
       });
       console.log(tx);
 
@@ -135,7 +149,7 @@ export default function Home() {
         id: toastId,
       });
     }
-  };
+  }, [adapter, account]);
 
   const handleBurnBlock = async () => {
     if (!account) {
@@ -230,7 +244,6 @@ export default function Home() {
   };
 
   const handleSelect = (block: Block) => {
-    
     if (isStackMode) {
       if (selectedId != block.id) {
         handleStackBlock(block);
@@ -358,7 +371,8 @@ export default function Home() {
               )}
             </div>
 
-            <br></br><br></br>
+            <br></br>
+            <br></br>
             <div className="flex gap-4 items-center justify-center">
               {isLoading ? (
                 <LoaderIcon className="!w-8 !h-8" />

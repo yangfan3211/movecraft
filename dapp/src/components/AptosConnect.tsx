@@ -5,6 +5,7 @@ import { WalletModal } from "./WalletModal";
 
 export function AptosConnect() {
   const { account } = useWallet();
+
   const { modalState, setModalState } = useContext(ModalContext);
 
   return (

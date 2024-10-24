@@ -7,21 +7,24 @@ import {
   CAPY_STATE_SEED,
   APTOS_CONFIG,
 } from "../config/constants";
-import { useWallet } from "@manahippo/aptos-wallet-adapter";
-import { MoveResource } from "@martiandao/aptos-web3-bip44.js/dist/generated";
+// import { useWallet } from "@manahippo/aptos-wallet-adapter";
+// import { MoveResource } from "@martiandao/aptos-web3-bip44.js/dist/generated";
 import { useState, useEffect, useCallback } from "react";
 import React from "react";
-import { Account, Aptos, AptosConfig, Network, AccountAddressInput } from "@aptos-labs/ts-sdk";
+import { Account, Aptos, AptosConfig, Network, AccountAddressInput, InputGenerateTransactionPayloadData } from "@aptos-labs/ts-sdk";
 import toast, { LoaderIcon } from "react-hot-toast";
 import { CapyItem } from "../components/CapyItem";
 import { Block } from "../types/Block";
 import { BlockItem } from "../components/BlockItem";
 import { Capy } from "../types/Capy";
+import { useAptosWallet } from "@razorlabs/wallet-kit";
 
 export default function Home() {
   const client = new Aptos(APTOS_CONFIG);
 
-  const { account, signAndSubmitTransaction } = useWallet();
+  // const { account, signAndSubmitTransaction } = useWallet();
+  const {account, signAndSubmitTransaction} = useAptosWallet()
+
 
   const [isLoading, setLoading] = useState<boolean>(false);
   const [selectedBlock, setSelectedBlock] = useState<Block>();
@@ -92,8 +95,9 @@ export default function Home() {
 
     const [object_id_1, object_id_2] = craftTokenIds;
 
-    await signAndSubmitTransaction(doGenerateCapy(object_id_1, object_id_2), {
-      gas_unit_price: 100,
+    await signAndSubmitTransaction({
+      payload: doGenerateCapy(object_id_1, object_id_2) as InputGenerateTransactionPayloadData,
+      gasUnitPrice: 100,
     })
       .then(() => {
         toast.success("Capy generated successfully!");
@@ -111,8 +115,8 @@ export default function Home() {
     return {
       type: "entry_function_payload",
       function: DAPP_ADDRESS + "::capy::generate_capy",
-      type_arguments: [],
-      arguments: [name, description, object_id_1, object_id_2],
+      typeArguments: [],
+      functionArguments: [name, description, object_id_1, object_id_2],
     };
   }
 
