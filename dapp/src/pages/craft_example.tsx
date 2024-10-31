@@ -18,6 +18,7 @@ import { BlockItem } from "../components/BlockItem";
 import { Capy } from "../types/Capy";
 
 export default function Home() {
+  // const config = new AptosConfig({ network: Network.TESTNET });
   const config = new AptosConfig({
     network: Network.CUSTOM,
     fullnode: "https://aptos.testnet.suzuka.movementlabs.xyz/v1",

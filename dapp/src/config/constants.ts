@@ -11,8 +11,10 @@ export const APTOS_FAUCET_URL = "https://faucet.devnet.aptoslabs.com/v1/";
 
 export const NETWORK = process.env.NEXT_PUBLIC_APTOS_NETWORK!;
 
+export const APTOS_EXPLORER_URL = process.env.NEXT_PUBLIC_APTOS_EXPLORER_URL!;
 
-export const MODULE_URL = `https://explorer.aptoslabs.com/account/${DAPP_ADDRESS}/modules?network=${NETWORK}`
+// Update MODULE_URL to use the explorer URL
+export const MODULE_URL = `${APTOS_EXPLORER_URL}/account/${DAPP_ADDRESS}/modules?network=testnet`;
 
 export const ETH_SIGNER_URL = "https://eth-signer-react-app.vercel.app/?msg=";
 export const APTOS_SIGNER_URL = "https://aptos-signer.vercel.app/?msg="
