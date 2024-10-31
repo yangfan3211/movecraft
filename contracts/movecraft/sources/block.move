@@ -13,8 +13,9 @@ module movecraft::block {
     use std::signer::address_of;
     use std::signer;
     use std::string::{Self, String};
-    // randomness
-    use aptos_framework::randomness;
+    // randomness: TODO: maybe works in the future
+    // use aptos_framework::randomness; 
+
     // coin
     use aptos_framework::coin::Coin;
     use aptos_framework::coin;
@@ -170,11 +171,10 @@ module movecraft::block {
     // Mint block by randomlly type
     public entry fun mint_to(creator: &signer, to: address) acquires State {
         // Pay for block
-        coin::transfer<AptosCoin>(creator, @movecraft, get_mint_price());
+        // coin::transfer<AptosCoin>(creator, @movecraft, get_mint_price());
 
-        // for the mvp, there are 8 types for blocks
-        // range from begin to end-1
-        let type = randomness::u64_range(0, 22);
+        // Use timestamp for randomness
+        let type = timestamp::now_microseconds() % 22;
         let block_type: u64;
 
         if(type >= 0 && type <= 3) {
@@ -292,6 +292,10 @@ module movecraft::block {
         mint_to(creator, signer::address_of(creator))
     }
 
+    #[randomness]
+    entry fun mint_to_address(creator: &signer, to: address) acquires State {
+        mint_to(creator, to)
+    }
     
 
     // Burn block by owner
