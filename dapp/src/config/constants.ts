@@ -22,7 +22,6 @@ export const APTOS_EXPLORER_URL = process.env.NEXT_PUBLIC_APTOS_EXPLORER_URL!;
 export const MODULE_URL = `${APTOS_EXPLORER_URL}/account/${DAPP_ADDRESS}/modules?network=${NETWORK}`;
 
 
-
 export const ETH_SIGNER_URL = "https://eth-signer-react-app.vercel.app/?msg=";
 export const APTOS_SIGNER_URL = "https://aptos-signer.vercel.app/?msg=";
 

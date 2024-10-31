@@ -370,7 +370,8 @@ export default function Home() {
             <p> * 1 cell #0 + 1 cell #1 = Music NFT #1</p>
             <p> * 1 cell #2 + 1 cell #3 = Music NFT #2</p>
             <p> * 1 cell #4 + 1 cell #5 = Music NFT #3</p>
-            <br></br><br></br>
+            <br></br>
+            <br></br>
             Selected the cells for generate Music NFT:
             <br></br>
             {selectedId && (
