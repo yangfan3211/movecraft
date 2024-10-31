@@ -1,11 +1,18 @@
 import Image from "next/image";
 import { NavItem } from "./NavItem";
-import { AptosConnect } from "./AptosConnect";
+// import { AptosConnect } from "./AptosConnect";
 import {
-  MODULE_URL
+  APTOS_NODE_URL,
+  MODULE_URL,
+  NETWORK,
+  NETWORK_TYPE,
+  SUZUKA_CHAIN_ID
 } from "../config/constants";
+import { AptosChainId, AptosConnectButton, useAptosWallet } from '@razorlabs/wallet-kit';
+import { ChainId, Network, NetworkToChainId } from "@aptos-labs/ts-sdk";
 
 export function NavBar() {
+  const {adapter} = useAptosWallet()
   return (
     <nav className="navbar py-4 px-4 bg-base-100">
       <div className="flex-1">
@@ -22,7 +29,15 @@ export function NavBar() {
           </li>
         </ul>
       </div>
-      <AptosConnect />
+      {/* <AptosConnect /> */}
+      <AptosConnectButton  onConnectSuccess={() => {
+        adapter?.features["aptos:changeNetwork"]?.changeNetwork({
+          name: NETWORK === "testnet" ? Network.TESTNET : Network.MAINNET,
+          chainId: NETWORK_TYPE ==='aptos'? NetworkToChainId[Network.TESTNET]:SUZUKA_CHAIN_ID,
+          url: APTOS_NODE_URL,
+        });
+      }}
+      />
     </nav>
   );
 }

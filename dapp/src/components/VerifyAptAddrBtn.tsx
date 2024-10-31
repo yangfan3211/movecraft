@@ -5,13 +5,15 @@
 //     // useOnBlock,
 //     useUserProviderAndSigner,
 //   } from "eth-hooks";
-import { AptosWalletAdapter } from "@manahippo/aptos-wallet-adapter";
-import { ethers } from "ethers";
+// import { AptosWalletAdapter } from "@manahippo/aptos-wallet-adapter";
+// import { ethers } from "ethers";
 import { useState, useEffect } from "react";
-import { useWallet } from '@manahippo/aptos-wallet-adapter';
+// import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { DAPP_ADDRESS } from "../config/constants";
 import { WalletClient } from "@martiandao/aptos-web3-bip44.js";
 import { APTOS_NODE_URL, APTOS_FAUCET_URL, ETH_SIGNER_URL, APTOS_SIGNER_URL } from "../config/constants";
+import { useAptosWallet } from "@razorlabs/wallet-kit";
+import { InputGenerateTransactionPayloadData } from "@aptos-labs/ts-sdk";
 
 interface props {
     addrInfo: any,
@@ -24,7 +26,9 @@ interface props {
 
 export default function VerifyEthAddrBtn({ addrInfo, addrIndex, address, verified, get_addr_info }: props) {
     const [currentAccount, setCurrentAccount] = useState<string>();
-    const { account, signAndSubmitTransaction } = useWallet();
+    // const { account, signAndSubmitTransaction } = useWallet();
+  const {account, signAndSubmitTransaction} = useAptosWallet()
+
     const [msg, setMsg] = useState<string>();
     const client = new WalletClient(APTOS_NODE_URL, APTOS_FAUCET_URL);
     const [signature, setSignature] = useState<string>("");
@@ -41,10 +45,13 @@ export default function VerifyEthAddrBtn({ addrInfo, addrIndex, address, verifie
         const payload = {
             type: 'entry_function_payload',
             function: DAPP_ADDRESS + '::addr_aggregator::update_aptos_addr',
-            type_arguments: [],
-            arguments: [address, signature, "APTOS\nmessage: " + msg + "\nnonce: random_string_may_change_as_nonce"],
+            typeArguments: [],
+            functionArguments: [address, signature, "APTOS\nmessage: " + msg + "\nnonce: random_string_may_change_as_nonce"],
         }
-        const txn = await signAndSubmitTransaction(payload, { gas_unit_price: 100 });
+        const txn = await signAndSubmitTransaction({
+          payload: payload as InputGenerateTransactionPayloadData,
+          gasUnitPrice: 100,
+        });
         console.log(txn);
         get_addr_info();
     }
