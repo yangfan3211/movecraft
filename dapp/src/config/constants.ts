@@ -38,4 +38,5 @@ export const APTOS_CONFIG = new AptosConfig({
   network: NETWORK === "testnet" ? Network.TESTNET : Network.MAINNET,
   fullnode: APTOS_NODE_URL,
   faucet: APTOS_FAUCET_URL,
+  indexer: "https://indexer.testnet.porto.movementnetwork.xyz/v1/graphql"
 });

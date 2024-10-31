@@ -50,6 +50,7 @@ export default function Home() {
   const [isStackMode, setStackMode] = useState<boolean>(false);
 
   const loadBlocks = async () => {
+    console.log("client", client);
     if (account && account.address) {
       // try {
       setLoading(true);
@@ -63,6 +64,9 @@ export default function Home() {
         accountAddress: account.address.toString(),
         collectionAddress: collectionAddress,
       });
+
+      console.log("accountAddress", account.address);
+      console.log("tokens", tokens);
 
       const blocks = tokens.map((t) => {
         const token_data = t.current_token_data;
