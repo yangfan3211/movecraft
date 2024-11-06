@@ -11,14 +11,7 @@ module movecraft::collection{
     
     use moveos_std::object;
 
-    friend movecraft::cell_0;
-    friend movecraft::cell_1;
-    friend movecraft::cell_2;
-    friend movecraft::cell_3;
-    friend movecraft::cell_4;
-    friend movecraft::cell_5;
-    friend movecraft::cell_6;
-    friend movecraft::cell_7;
+    friend movecraft::cells;
     
     const ErrorCollectionMaximumSupply: u64 = 1;
 

@@ -1,16 +1,10 @@
 module movecraft::block {
     use moveos_std::account;
     use std::string;
-    use movecraft::cell_0;
-    use movecraft::cell_1;
-    use movecraft::cell_2;
-    use movecraft::cell_3;
-    use movecraft::cell_4;
-    use movecraft::cell_5;
-    use movecraft::cell_6;
-    use movecraft::cell_7;
+    use movecraft::cells;
     use movecraft::collection;
     use moveos_std::timestamp;
+    use movecraft::cells::NFT;
 
     use moveos_std::object::{Self, Object};
     use moveos_std::object::ObjectID;
@@ -18,8 +12,14 @@ module movecraft::block {
     use bitcoin_move::utxo::{Self, UTXO};
 
     const ErrorInvalidCellId: u64 = 1000;
-
     const ErrorAlreadyStaked: u64 = 1001;
+
+    const ENOT_VALID_BLOCK_TYPE: u64 = 2002;
+    const ENOT_BLOCK_OWNER: u64 = 2003;
+    const ENOT_VALID_BLOCK: u64 = 2004;
+    const ENOT_STACKABLE: u64 = 2005;
+    const ENOT_TYPEMATCH: u64 = 2006;
+    const ENOT_AMOUNT_MATCH: u64= 2007;
 
 
     /// The stake info of UTXO
@@ -34,24 +34,7 @@ module movecraft::block {
     // TODO: make it mint randomlly, refer the `blind-box`
     public entry fun mint_cell(account: &signer, collection_obj: &mut Object<collection::Collection>, cell_id: u64) {
         assert!(cell_id <= 7, ErrorInvalidCellId); // Ensure cell_id is valid
-
-        if (cell_id == 0) {
-            cell_0::mint_entry(collection_obj)
-        } else if (cell_id == 1) {
-            cell_1::mint_entry(collection_obj)
-        } else if (cell_id == 2) {
-            cell_2::mint_entry(collection_obj)
-        } else if (cell_id == 3) {
-            cell_3::mint_entry(collection_obj)
-        } else if (cell_id == 4) {
-            cell_4::mint_entry(collection_obj)
-        } else if (cell_id == 5) {
-            cell_5::mint_entry(collection_obj)
-        } else if (cell_id == 6) {
-            cell_6::mint_entry(collection_obj)
-        } else if (cell_id == 7) {
-            cell_7::mint_entry(collection_obj)
-        };
+        cells::mint_entry(collection_obj, cell_id);
     }
 
     /// Stake the UTXO to get the `Movecraft NFT`
@@ -69,6 +52,7 @@ module movecraft::block {
     }
 
     // TODO: Claim the `Movecraft NFT` from the UTXO
+    // DO NOT DELETE THIS FUNCTION
     /// Claim the `BTC Holder Coin` from the UTXO
     // public fun do_claim(coin_info_holder_obj: &mut Object<CoinInfoHolder>, utxo_obj: &mut Object<UTXO>): Coin<HDC> {
     //     let utxo_value = utxo::value(object::borrow(utxo_obj));
@@ -88,6 +72,29 @@ module movecraft::block {
     //     account_coin_store::deposit(sender, coin);
     // }
 
+    public entry fun set_block_num(nft_obj: &mut Object<NFT>, block_num: u64) {
+        cells::set_block_num(nft_obj, block_num);
+    }
 
-
+    /// Stack two blocks together. Both blocks must be of the same type and stackable.
+    /// The second block will be burned after stacking.
+    public entry fun stack_block(account: &signer, collection_obj: &mut Object<collection::Collection>, block1: Object<NFT>, block2: Object<NFT>) {
+        // Get properties of both blocks
+        let block1_type = cells::type(object::borrow(&block1));
+        let block2_type = cells::type(object::borrow(&block2));
+        
+        // Validate blocks are of same type
+        assert!(block1_type == block2_type, ENOT_TYPEMATCH);
+        
+        // Get current block counts
+        let block1_count = cells::block_num(object::borrow(&block1));
+        let block2_count = cells::block_num(object::borrow(&block2));
+        
+        // Update block1's count
+        cells::set_block_num(&mut block1, block1_count + block2_count);
+        
+        // Burn block2
+        cells::burn(collection_obj, block1);
+        cells::burn(collection_obj, block2);
+    }
 }
