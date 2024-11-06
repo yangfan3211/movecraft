@@ -7,9 +7,13 @@ MoveStdlib = { git = "https://github.com/rooch-network/rooch.git", subdir = "fra
 MoveosStdlib = { git = "https://github.com/rooch-network/rooch.git", subdir = "frameworks/moveos-stdlib", rev = "main" }
 RoochFramework = { git = "https://github.com/rooch-network/rooch.git", subdir = "frameworks/rooch-framework", rev = "main" }
 BitcoinMove = { git = "https://github.com/rooch-network/rooch.git", subdir = "frameworks/bitcoin-move", rev = "main" }
+
 [addresses]
 movecraft = "_"
 std = "0x1"
 moveos_std = "0x2"
 rooch_framework = "0x3"
 bitcoin_move =  "0x4"
+
+[dev-addresses]
+movecraft = "0x42"
