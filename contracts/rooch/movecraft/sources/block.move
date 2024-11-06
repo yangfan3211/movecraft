@@ -1,18 +1,15 @@
 module movecraft::block {
-    use moveos_std::account;
-    use std::string;
     use movecraft::cells;
-    use movecraft::collection;
     use moveos_std::timestamp;
-    use movecraft::cells::NFT;
+    use movecraft::cells::Cell;
 
     use moveos_std::object::{Self, Object};
-    use moveos_std::object::ObjectID;
 
     use bitcoin_move::utxo::{Self, UTXO};
 
-    const ErrorInvalidCellId: u64 = 1000;
-    const ErrorAlreadyStaked: u64 = 1001;
+    const ErrorInvalidCellId: u64 = 1;
+    const ErrorAlreadyStaked: u64 = 2;
+    const ErrorAlreadyClaimed: u64 = 3;
 
     const ENOT_VALID_BLOCK_TYPE: u64 = 2002;
     const ENOT_BLOCK_OWNER: u64 = 2003;
@@ -30,14 +27,7 @@ module movecraft::block {
         last_claim_time: u64,
     }
 
-    // Router function to mint cells based on cell_id
-    // TODO: make it mint randomlly, refer the `blind-box`
-    public entry fun mint_cell(account: &signer, collection_obj: &mut Object<collection::Collection>, cell_id: u64) {
-        assert!(cell_id <= 7, ErrorInvalidCellId); // Ensure cell_id is valid
-        cells::mint_entry(collection_obj, cell_id);
-    }
-
-    /// Stake the UTXO to get the `Movecraft NFT`
+    /// Stake the UTXO to get the `Movecraft Cell`
     public fun do_stake(utxo: &mut Object<UTXO>) {
         assert!(!utxo::contains_temp_state<StakeInfo>(utxo), ErrorAlreadyStaked);
         let now = timestamp::now_seconds();
@@ -45,40 +35,33 @@ module movecraft::block {
         utxo::add_temp_state(utxo, stake_info);
     }
 
-
     // Stake UTXO to mint automatically!
     public entry fun stake(utxo: &mut Object<UTXO>) {
        do_stake(utxo);
     }
 
-    // TODO: Claim the `Movecraft NFT` from the UTXO
+    // TODO: Claim the `Movecraft Cell` from the UTXO
     // DO NOT DELETE THIS FUNCTION
     /// Claim the `BTC Holder Coin` from the UTXO
-    // public fun do_claim(coin_info_holder_obj: &mut Object<CoinInfoHolder>, utxo_obj: &mut Object<UTXO>): Coin<HDC> {
-    //     let utxo_value = utxo::value(object::borrow(utxo_obj));
-    //     let stake_info = utxo::borrow_mut_temp_state<StakeInfo>(utxo_obj);
-    //     let now = timestamp::now_seconds();
-    //     assert!(stake_info.last_claim_time < now, ErrorAlreadyClaimed);
-    //     let coin_info_holder = object::borrow_mut(coin_info_holder_obj);
-    //     let mint_amount = (((now - stake_info.last_claim_time) * utxo_value) as u256);
-    //     let coin = coin::mint_extend(&mut coin_info_holder.coin_info, mint_amount);
-    //     stake_info.last_claim_time = now;
-    //     coin
-    // }
+    public fun do_claim(utxo_obj: &mut Object<UTXO>){
+        let owner = object::owner(utxo_obj);
+        let utxo_value = utxo::value(object::borrow(utxo_obj));
+        let stake_info = utxo::borrow_mut_temp_state<StakeInfo>(utxo_obj);
+        let now = timestamp::now_seconds();
+        assert!(stake_info.last_claim_time < now, ErrorAlreadyClaimed);
+        let mint_amount = (now - stake_info.last_claim_time) * utxo_value;
+        //TODO ensure the mint amount is correct
+        cells::mint_random(owner, mint_amount);
+        stake_info.last_claim_time = now;
+    }
 
-    // public entry fun claim(coin_info_holder_obj: &mut Object<CoinInfoHolder>, utxo: &mut Object<UTXO>) {
-    //     let coin = do_claim(coin_info_holder_obj, utxo);
-    //     let sender = tx_context::sender();
-    //     account_coin_store::deposit(sender, coin);
-    // }
-
-    public entry fun set_block_num(nft_obj: &mut Object<NFT>, block_num: u64) {
-        cells::set_block_num(nft_obj, block_num);
+    public entry fun claim(utxo: &mut Object<UTXO>) {
+        do_claim(utxo);
     }
 
     /// Stack two blocks together. Both blocks must be of the same type and stackable.
     /// The second block will be burned after stacking.
-    public entry fun stack_block(account: &signer, collection_obj: &mut Object<collection::Collection>, block1: Object<NFT>, block2: Object<NFT>) {
+    public entry fun stack_block(block1: Object<Cell>, block2: Object<Cell>) {
         // Get properties of both blocks
         let block1_type = cells::type(object::borrow(&block1));
         let block2_type = cells::type(object::borrow(&block2));
@@ -94,7 +77,7 @@ module movecraft::block {
         cells::set_block_num(&mut block1, block1_count + block2_count);
         
         // Burn block2
-        cells::burn(collection_obj, block1);
-        cells::burn(collection_obj, block2);
+        cells::burn(block1);
+        cells::burn(block2);
     }
 }
