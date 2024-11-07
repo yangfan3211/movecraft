@@ -80,4 +80,6 @@ module movecraft::block {
         // Burn block2
         cells::burn(block2);
     }
+
+
 }

@@ -134,6 +134,18 @@ module movecraft::cells {
         nft.index
     }
 
+    /// View function to get all Cell properties by ObjectID
+    public fun view_cell_by_id(object_id: ObjectID): (String, address, u64, u64, u64) {
+        let cell = object::borrow<Cell>(object::borrow_object(object_id));
+        (
+            name(cell),
+            creator(cell),
+            block_num(cell),
+            type(cell),
+            index(cell)
+        )
+    }
+
     fun mint(owner: address, cell_type: u64, block_num: u64){
         assert!(cell_type < 8, ErrorInvalidCellType);
         let global = account::borrow_mut_resource<Config>(@movecraft);
