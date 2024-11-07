@@ -35,22 +35,24 @@ module movecraft::cells {
     }
 
     fun init() {
-        let _uris = vector[
-            b"https://arweave.net/7xopmyHOuhNtH2UXomaCt8m3FK42EzJ8Fb8MuGtXU58",
-            b"https://arweave.net/vKq1vpQ2gR05Hf9Nn50Ut-0j2BhtOwzBnUxxDNCuTXA",
-            b"https://arweave.net/y8aRTqcRdvBmI6DwJ7_RgK22U2tcsD97vQ8Mz64IGn0",
-            b"https://arweave.net/1WNPHI6RU0L91vDM9p6a7MY6AoGlO959iRPrle_0QAA",
-            b"https://arweave.net/pPX-WLBK-CfLe_TdE-Bm7QURuUvFIEwok9tc_aGQjrM",
-            b"https://arweave.net/IynWqymNQoSPeIjGjV0I1vhXp9mCiOzyB6F9Pbd1aoQ",
-            b"https://arweave.net/uZAmafyXBL8KFeIWuLi6P3jSeRZke7oVnuAMRgup0_k",
-            b"https://arweave.net/GokPo_tEy0AYT1RUrHm9fz0J29cQ0eEmYt4CT5kuq5I"
-        ];
+        // let _uris = vector[
+        //     b"https://arweave.net/7xopmyHOuhNtH2UXomaCt8m3FK42EzJ8Fb8MuGtXU58",
+        //     b"https://arweave.net/vKq1vpQ2gR05Hf9Nn50Ut-0j2BhtOwzBnUxxDNCuTXA",
+        //     b"https://arweave.net/y8aRTqcRdvBmI6DwJ7_RgK22U2tcsD97vQ8Mz64IGn0",
+        //     b"https://arweave.net/1WNPHI6RU0L91vDM9p6a7MY6AoGlO959iRPrle_0QAA",
+        //     b"https://arweave.net/pPX-WLBK-CfLe_TdE-Bm7QURuUvFIEwok9tc_aGQjrM",
+        //     b"https://arweave.net/IynWqymNQoSPeIjGjV0I1vhXp9mCiOzyB6F9Pbd1aoQ",
+        //     b"https://arweave.net/uZAmafyXBL8KFeIWuLi6P3jSeRZke7oVnuAMRgup0_k",
+        //     b"https://arweave.net/GokPo_tEy0AYT1RUrHm9fz0J29cQ0eEmYt4CT5kuq5I"
+        // ];
 
         let nft_display_object = display::display<Cell>();
-        display::set_value(nft_display_object, string::utf8(b"creator"), string::utf8(b"leeduckgo"));
+        display::set_value(nft_display_object, string::utf8(b"creator"), string::utf8(b"{value.creator}"));
         display::set_value(nft_display_object, string::utf8(b"name"), string::utf8(b"Cell # {value.type}"));
-        //TODO generate dynamic svg
-        //display::set_value(nft_display_object, string::utf8(b"uri"), string::utf8(b"{value.uri}"));
+        display::set_value(nft_display_object, string::utf8(b"block_num"), string::utf8(b"{value.block_num}"));
+        display::set_value(nft_display_object, string::utf8(b"type"), string::utf8(b"{value.type}"));
+        display::set_value(nft_display_object, string::utf8(b"index"), string::utf8(b"{value.index}"));
+        display::set_value(nft_display_object, string::utf8(b"uri"), string::utf8(b"https://raw.githubusercontent.com/rootMUD/movecraft/refs/heads/main/contracts/rooch/movecraft/cells/cell_{value.type}.svg"));
 
         let i = 0;
         let indices = vector[];
