@@ -1,4 +1,4 @@
-module movecraft::cells {
+module movecraft::cellsv2 {
     use std::string::{Self, String};
     use std::vector;
     use moveos_std::display;
@@ -11,7 +11,7 @@ module movecraft::cells {
     use moveos_std::tx_context::sender;
     use rooch_framework::simple_rng;
 
-    friend movecraft::block;
+    friend movecraft::blockv2;
 
     #[test_only]
     use std::option;

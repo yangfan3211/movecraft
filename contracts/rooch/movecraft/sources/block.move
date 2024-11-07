@@ -1,7 +1,7 @@
-module movecraft::block {
-    use movecraft::cells;
+module movecraft::blockv2 {
+    use movecraft::cellsv2;
     use moveos_std::timestamp;
-    use movecraft::cells::Cell;
+    use movecraft::cellsv2::Cell;
 
     use moveos_std::object::{Self, Object};
     use moveos_std::object::ObjectID;
@@ -53,7 +53,7 @@ module movecraft::block {
         assert!(stake_info.last_claim_time < now, ErrorAlreadyClaimed);
         let mint_amount = (now - stake_info.last_claim_time) * utxo_value;
         //TODO ensure the mint amount is correct
-        cells::mint_random(owner, mint_amount);
+        cellsv2::mint_random(owner, mint_amount);
         stake_info.last_claim_time = now;
     }
 
@@ -62,34 +62,28 @@ module movecraft::block {
         do_claim(utxo);
     }
 
-    public entry fun stack_block_by_id(block1_id: ObjectID, block2_id: ObjectID) {
-        let block1 = object::borrow_mut_object_shared<Cell>(block1_id);
-        let block2 = object::borrow_mut_object_shared<Cell>(block2_id);
-        stack_block(block1, block2);
-    }
-
     /// Stack two blocks together. Both blocks must be of the same type and stackable.
     /// The second block will be burned after stacking.
-    // TODO: use object id as parameter instead of object.
-    public entry fun stack_block(block1: &mut Object<Cell>, block2: &mut Object<Cell>) {
+    public entry fun stack_block(block1: Object<Cell>, block2: Object<Cell>) {
         // Get properties of both blocks
-        let block1_type = cells::type(object::borrow(block1));
-        let block2_type = cells::type(object::borrow(block2));
-        let owner = object::owner(block1);
+
+        let block1_type = cellsv2::type(object::borrow(&block1));
+        let block2_type = cellsv2::type(object::borrow(&block2));
+        let owner = object::owner(&block1);
         
         // Validate blocks are of same type
         assert!(block1_type == block2_type, ENOT_TYPEMATCH);
         
         // Get current block counts
-        let block1_count = cells::block_num(object::borrow(block1));
-        let block2_count = cells::block_num(object::borrow(block2));
+        let block1_count = cellsv2::block_num(object::borrow(&block1));
+        let block2_count = cellsv2::block_num(object::borrow(&block2));
         
         // Mint new combined block
-        cells::mint(owner, block1_type, block1_count + block2_count);
+        cellsv2::mint(owner, block1_type, block1_count + block2_count);
         
         // Burn the original blocks
-        cells::burn(*block1);
-        cells::burn(*block2);
+        cellsv2::burn(block1);
+        cellsv2::burn(block2);
     }
 
 
