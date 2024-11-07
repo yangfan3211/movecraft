@@ -166,12 +166,12 @@ module movecraft::cellsv5 {
         let owner_nfts = table::borrow_mut(&mut global.minted_addresses, owner);
         vector::push_back(owner_nfts, nft_id);
 
-        table::add(&mut global.all_cells, index, nft_id);
+        table::add(&mut global.all_cells, global.count, nft_id);
         global.count = global.count + 1;
     }
 
     public(friend) fun mint_random(owner: address, block_num: u64){
-        let cell_type = simple_rng::rand_u64_range(0,8);
+        let cell_type = simple_rng::rand_u64_range(0, 8);
         mint(owner, cell_type, block_num);
     }
 
@@ -180,6 +180,19 @@ module movecraft::cellsv5 {
         mint_random(sender(), 1);
     }
 
+    public fun get_all_cells_with_details(): vector<(String, address, u64, u64, u64)> {
+        let global = account::borrow_resource<Config>(@movecraft);
+        let result = vector::empty<(String, address, u64, u64, u64)>();
+        let i = 0;
+        while (i < global.count) {
+            if (table::contains(&global.all_cells, i)) {
+                vector::push_back(&mut result, view_cell_by_id(*table::borrow(&global.all_cells, i)));
+            };
+            i = i + 1;
+        };
+        result
+    }
+    
     public fun get_all_cells(): vector<ObjectID> {
         let global = account::borrow_resource<Config>(@movecraft);
         let result = vector::empty<ObjectID>();
