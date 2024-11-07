@@ -1,4 +1,4 @@
-module movecraft::cellsv2 {
+module movecraft::cellsv5 {
     use std::string::{Self, String};
     use std::vector;
     use moveos_std::display;
@@ -11,7 +11,7 @@ module movecraft::cellsv2 {
     use moveos_std::tx_context::sender;
     use rooch_framework::simple_rng;
 
-    friend movecraft::blockv2;
+    friend movecraft::blocksv5;
 
     #[test_only]
     use std::option;
@@ -31,7 +31,9 @@ module movecraft::cellsv2 {
 
     struct Config has key, store {
         indices: vector<u64>,
-        minted_addresses: vector<Table<address, ObjectID>>
+        minted_addresses: Table<address,vector<ObjectID>>,
+        count: u64,
+        all_cells: Table<u64, ObjectID>,
     }
 
     fun init() {
@@ -56,17 +58,18 @@ module movecraft::cellsv2 {
 
         let i = 0;
         let indices = vector[];
-        let minted_addresses = vector[];
+        let minted_addresses = table::new<address, vector<ObjectID>>();
         while (i < 8) {
             vector::push_back(&mut indices, 0);
-            vector::push_back(&mut minted_addresses, table::new());
             i = i + 1;
         };
 
         let module_signer = signer::module_signer<Config>();
         let config = Config {
             indices,
-            minted_addresses
+            minted_addresses,
+            all_cells: table::new<u64, ObjectID>(),
+            count: 0,
         };
         account::move_resource_to(&module_signer, config)
     }
@@ -156,7 +159,15 @@ module movecraft::cellsv2 {
         object::transfer(nft_obj, owner);
 
         *vector::borrow_mut(&mut global.indices, cell_type) = index + 1;
-        table::add(vector::borrow_mut(&mut global.minted_addresses, cell_type), owner, nft_id);
+        
+        if (!table::contains(&global.minted_addresses, owner)) {
+            table::add(&mut global.minted_addresses, owner, vector::empty<ObjectID>());
+        };
+        let owner_nfts = table::borrow_mut(&mut global.minted_addresses, owner);
+        vector::push_back(owner_nfts, nft_id);
+
+        table::add(&mut global.all_cells, index, nft_id);
+        global.count = global.count + 1;
     }
 
     public(friend) fun mint_random(owner: address, block_num: u64){
@@ -167,6 +178,24 @@ module movecraft::cellsv2 {
     /// Mint a new Cell and transfer it to sender
     public entry fun mint_entry() {
         mint_random(sender(), 1);
+    }
+
+    public fun get_all_cells(): vector<ObjectID> {
+        let global = account::borrow_resource<Config>(@movecraft);
+        let result = vector::empty<ObjectID>();
+        let i = 0;
+        while (i < global.count) {
+            if (table::contains(&global.all_cells, i)) {
+                vector::push_back(&mut result, *table::borrow(&global.all_cells, i));
+            };
+            i = i + 1;
+        };
+        result
+    }
+
+    public fun remove_cell(index: u64) {
+        let global = account::borrow_mut_resource<Config>(@movecraft);
+        table::remove(&mut global.all_cells, index);
     }
 
     /// This is a testing function for minting a specific cell type
