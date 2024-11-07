@@ -146,7 +146,7 @@ module movecraft::cells {
         )
     }
 
-    fun mint(owner: address, cell_type: u64, block_num: u64){
+    public(friend) fun mint(owner: address, cell_type: u64, block_num: u64){
         assert!(cell_type < 8, ErrorInvalidCellType);
         let global = account::borrow_mut_resource<Config>(@movecraft);
         let index = *vector::borrow(&global.indices, cell_type);
