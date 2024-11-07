@@ -61,6 +61,7 @@ module movecraft::block {
 
     /// Stack two blocks together. Both blocks must be of the same type and stackable.
     /// The second block will be burned after stacking.
+    // TODO: use object id as parameter instead of object.
     public entry fun stack_block(block1: Object<Cell>, block2: Object<Cell>) {
         // Get properties of both blocks
         let block1_type = cells::type(object::borrow(&block1));
@@ -77,7 +78,6 @@ module movecraft::block {
         cells::set_block_num(&mut block1, block1_count + block2_count);
         
         // Burn block2
-        cells::burn(block1);
         cells::burn(block2);
     }
 }
